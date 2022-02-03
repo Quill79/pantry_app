@@ -35,40 +35,30 @@ register()
 
 
 def access():
-    db = open("database.txt", "r")
     username = input("Enter Username:")
     password = input("Enter Password:")
-    if not len(username or password) <= 1:
-        d = []
-        f = []
-        for i in db:
-            a, b = i.split(", ")
-            b = b.strip()
-            d.append(a)
-            f.append(b)
-        data = dict(zip(d, f))
-
-        try:
-            if data[username]:
-                try:
-                    if password == data[username]:
-                        print("Login Success\n")
-                        print("Hi,", username)
-                    else:
-                        print("Username/Password Incorrect.")
-                        access()
-                except:
-                    print("Incorrect Password/Username.")
-                    access()
-            else:
-                print("Username doesn't exist.")
-                access()
-        except:
-            print("Login Error")
-            access()
-    else:
-        print("Please enter a value.")
-        access()
+    # if not len(username or password) <= 1:
+    #     try:
+    #         if data[username]:
+    #             try:
+    #                 if password == data[username]:
+    #                     print("Login Success\n")
+    #                     print("Hi,", username)
+    #                 else:
+    #                     print("Username/Password Incorrect.")
+    #                     access()
+    #             except:
+    #                 print("Incorrect Password/Username.")
+    #                 access()
+    #         else:
+    #             print("Username doesn't exist.")
+    #             access()
+    #     except:
+    #         print("Login Error")
+    #         access()
+    # else:
+    #     print("Please enter a value.")
+    #     access()
 
 
 def home(option=None):
@@ -99,23 +89,22 @@ def pantry_item_menu():
 def pantry_item(p_item):
     print("What would you like to do in the {item} pantry.".format(item=p_item))
     choice = 0
-    while choice != 4:
-        choice = pantry_item_menu()
-        if choice == 1:
-            with open("meat.txt".format(p_item)) as item:
-                for line in item:
-                    print(line)
-        elif choice == 2:
-            new = input("Enter name of ingredient you would like to add: ")
-            choice = input("You entered" + new + ". Is this correct (Y or N)?")
-            checked = choice.upper()
-            if checked == "Y":
-                with open("meat.txt".format(p_item), "w") as item:
-                    item.write(new + " Y")
-            elif checked == "N":
-                print("No")
-            else:
-                print("Invalid Input")
+    # while choice != 4:
+    #     choice = pantry_item_menu()
+    #     if choice == 1:
+    #             for line in item:
+    #                 print(line)
+    #     elif choice == 2:
+    #         new = input("Enter name of ingredient you would like to add: ")
+    #         choice = input("You entered" + new + ". Is this correct (Y or N)?")
+    #         checked = choice.upper()
+    #         if checked == "Y":
+
+    #                 item.write(new + " Y")
+    #         elif checked == "N":
+    #             print("No")
+    #         else:
+    #             print("Invalid Input")
 
 
 # //// Defining Main Functions ////
