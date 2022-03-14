@@ -8,58 +8,59 @@ mydb = mysql.connector.connect(
     database="pantry"
 )
 
-mycursor = mydb.cursor()
+my_cursor = mydb.cursor()
 
+
+# Accessing user table and checking to see if username in use
 
 def register():
-    username = input("Create Username:")
-    # password = input("Create Password:")
-    # password2 = input("Confirm Password:")
+    should_restart = True
+    while should_restart:
+        my_cursor.execute("SELECT * FROM users")
+        user_name = input("Create Username:")
+        should_restart = False
+        for user in my_cursor:
+            if user_name != user[1]:
+                continue
+            else:
+                print("Username Unavailable.")
+                should_restart = True
 
-    # Accessing user table and checking to see if username in use
-    users = mycursor.fetchall()
-    print(users)
-
-
-    # This is password checker function
-    # if password != password2:
-    #     print("Passwords do not match.")
-    #     register()
-    # elif len(password) <= 7:
-    #     print("Password too short.")
-    # else:
-    #     pass
+    password = input("Create Password: ")
+    password2 = input("Confirm Password: ")
+    if password != password2:
+        password = input("Create Password: ")
+        password2 = input("Confirm Password: ")
 
 
 register()
 
 
 def access():
-    username = input("Enter Username:")
-    password = input("Enter Password:")
-    # if not len(username or password) <= 1:
-    #     try:
-    #         if data[username]:
-    #             try:
-    #                 if password == data[username]:
-    #                     print("Login Success\n")
-    #                     print("Hi,", username)
-    #                 else:
-    #                     print("Username/Password Incorrect.")
-    #                     access()
-    #             except:
-    #                 print("Incorrect Password/Username.")
-    #                 access()
-    #         else:
-    #             print("Username doesn't exist.")
-    #             access()
-    #     except:
-    #         print("Login Error")
-    #         access()
-    # else:
-    #     print("Please enter a value.")
-    #     access()
-
+    username = input("Enter Username: ")
+    password = input("Enter Password: ")
+    if not len(username or password) <= 1:
+        try:
+            if data[username]:
+                try:
+                    if password == data[username]:
+                        print("Login Success\n")
+                        print("Hi,", username)
+                    else:
+                        print("Username/Password Incorrect.")
+                        access()
+                except:
+                    print("Incorrect Password/Username.")
+                    access()
+            else:
+                print("Username doesn't exist.")
+                access()
+        except:
+            print("Login Error")
+            access()
+    else:
+        print("Please enter a value.")
+        access()
 
 def home(option=None):
     typo = input("Login | Signup:")
