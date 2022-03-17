@@ -8,10 +8,10 @@ mydb = mysql.connector.connect(
     database="pantry"
 )
 
-my_cursor = mydb.cursor()
-
+my_cursor = mydb.cursor(buffered=True)
 
 # Accessing user table and checking to see if username in use
+
 
 def register():
     should_restart = True
@@ -23,50 +23,46 @@ def register():
             if user_name != user[1]:
                 continue
             else:
-                print("Username Unavailable.")
+                print(f"Username {user_name} Unavailable.")
                 should_restart = True
 
-    password = input("Create Password: ")
-    password2 = input("Confirm Password: ")
-    if password != password2:
+    password = "placeholder"
+    password2 = "placeholder2"
+    while password != password2:
         password = input("Create Password: ")
         password2 = input("Confirm Password: ")
 
-
-register()
+    sql = "INSERT INTO users (username, password) VALUES (%s, %s)"  # Inserting new user into user table
+    val = (user_name, password)
+    my_cursor.execute(sql, val)
+    mydb.commit()
 
 
 def access():
-    username = input("Enter Username: ")
-    password = input("Enter Password: ")
-    if not len(username or password) <= 1:
-        try:
-            if data[username]:
-                try:
-                    if password == data[username]:
-                        print("Login Success\n")
-                        print("Hi,", username)
-                    else:
-                        print("Username/Password Incorrect.")
-                        access()
-                except:
-                    print("Incorrect Password/Username.")
-                    access()
+    should_restart = True
+    while should_restart:
+        should_restart = False
+        # user_name = input("Enter Username: ")
+        # password = input("Enter Password: ")
+        user_name = "chris"
+        password = "Jessica123."
+        my_cursor.execute("SELECT * FROM users")
+
+        for user in my_cursor:
+            if user_name == user[1] and password == user[2]:
+                print("Login Successful")
+                print(f"Welcome {user[1]}!")
+                should_restart = False
+                return user[0]
             else:
-                print("Username doesn't exist.")
-                access()
-        except:
-            print("Login Error")
-            access()
-    else:
-        print("Please enter a value.")
-        access()
+                should_restart = True
+
 
 def home(option=None):
     typo = input("Login | Signup:")
     option = typo.lower()
     if option == "login":
-        access()
+        return access()
     elif option == "signup":
         register()
     else:
@@ -74,41 +70,57 @@ def home(option=None):
         home()
 
 
-#home()
+userid = home()  # Assigning userid
 
 
-def pantry_item_menu():
-    print("**********Pantry Menu**********")
+def pantry_item_menu(p_item):
+    print(f"\n**********{p_item} Menu**********")
     print("1. List Ingredients")
-    print("2. Add Ingredient")
-    print("3. Remove Ingredient")
+    print("2. Add New Ingredient")
+    print("3. Ingredient")
     print("4. Back to Main")
     choice = int(input("Make a selection: "))
     return choice
 
 
 def pantry_item(p_item):
-    print("What would you like to do in the {item} pantry.".format(item=p_item))
+    my_cursor.execute(f"SELECT * FROM dairy WHERE user_id = {userid}")
+    columns = dict(zip(my_cursor.column_names, my_cursor.fetchone()))
     choice = 0
-    # while choice != 4:
-    #     choice = pantry_item_menu()
-    #     if choice == 1:
-    #             for line in item:
-    #                 print(line)
-    #     elif choice == 2:
-    #         new = input("Enter name of ingredient you would like to add: ")
-    #         choice = input("You entered" + new + ". Is this correct (Y or N)?")
-    #         checked = choice.upper()
-    #         if checked == "Y":
+    while choice != 4:
+        choice = pantry_item_menu(p_item)
+        if choice == 1:
+            print("\n********** Inventory **********")
+            for key, value in columns.items():
+                if value == 1:
+                    value = "In Stock"
+                elif value == 0:
+                    value = "Out of Stock"
+                else:
+                    pass
+                print(f"{key : <15}:{value : <18}")
 
-    #                 item.write(new + " Y")
-    #         elif checked == "N":
-    #             print("No")
-    #         else:
-    #             print("Invalid Input")
+        elif choice == 2:
+            new = input("Enter name of ingredient you would like to add: ")
+            choice = input("You entered " + new + ". Is this correct (Y or N)?")
+            checked = choice.upper()
+            if checked == "Y":
+                my_cursor.execute(f"ALTER TABLE dairy \
+                                    ADD COLUMN {new} INT; \
+                                    UPDATE dairy \
+                                    SET {new} = 1 \
+                                    WHERE user_id == {userid}; \
+                                    UPDATE dairy \
+                                    SET {new} = 0 \
+                                    WHERE user_id != {userid};")
+                print("Please restart app for changes to take effect.")
+            else:
+                print("Invalid Input")
+    mydb.commit()
 
 
 # //// Defining Main Functions ////
+
 
 def check_pantry():
     category = 6
@@ -123,15 +135,15 @@ def check_pantry():
         """)
         category = int(input("What category would you like to check?"))
         if category == 1:
-            print(pantry_item("dairy"))
+            pantry_item("Dairy")
         elif category == 2:
-            pantry_item("meat")
+            pantry_item("Meat")
         elif category == 3:
-            pantry_item("vegetables")
+            pantry_item("Vegetable")
         elif category == 4:
-            pantry_item("fruits")
+            pantry_item("Fruit")
         elif category == 5:
-            pantry_item("snacks")
+            pantry_item("Snack")
         elif category == 0:
             return
         else:
@@ -150,36 +162,44 @@ def plan_meals():
     print("plan em")
 
 
+def recipes():
+    print("It's recipes")
+
+
 def make_check():
     print("can you make it?")
 
 
 # //// Main Menu Functions ////
+
 def menu():
     print("1. Check Pantry")
     print("2. Plan Meals")
     print("3. Generate Shopping List")
     print("4. Plan Meals")
-    print("5. What can I make?")
+    print("5. Recipes")
+    print("6. What can I make?")
     print("0. Exit")
 
 
-#menu()
-# ch = int(input("Make a choice: "))
-#
-# while ch != 0:
-#     if ch == 1:
-#         check_pantry()
-#     elif ch == 2:
-#         plan_meals()
-#     elif ch == 3:
-#         shopping_list()
-#     elif ch == 4:
-#         plan_meals()
-#     elif ch == 5:
-#         make_check()
-#     else:
-#         print("Invalid Input")
-#
-#     menu()
-#     ch = int(input("Make a choice: "))
+menu()
+ch = int(input("Make a choice: "))
+while ch != 0:
+    if ch == 1:
+        check_pantry()
+    elif ch == 2:
+        plan_meals()
+    elif ch == 3:
+        shopping_list()
+    elif ch == 4:
+        plan_meals()
+    elif ch == 5:
+        recipes()
+    elif ch == 6:
+        make_check()
+    elif ch == 0:
+        exit()
+    else:
+        print("Invalid Input")
+    menu()
+    ch = int(input("Make a choice: "))
