@@ -44,8 +44,8 @@ def access():
         should_restart = False
         # user_name = input("Enter Username: ")
         # password = input("Enter Password: ")
-        user_name = "chris"
-        password = "Jessica123."
+        user_name = "nathan"
+        password = "password"
         my_cursor.execute("SELECT * FROM users")
 
         for user in my_cursor:
@@ -76,21 +76,21 @@ userid = home()  # Assigning userid
 def pantry_item_menu(p_item):
     print(f"\n**********{p_item} Menu**********")
     print("1. List Ingredients")
-    print("2. Add New Ingredient")
-    print("3. Ingredient")
+    print("2. Alter Inventory")
+    print("3. Add New Ingredient")
     print("4. Back to Main")
     choice = int(input("Make a selection: "))
     return choice
 
 
 def pantry_item(p_item):
-    my_cursor.execute(f"SELECT * FROM dairy WHERE user_id = {userid}")
+    my_cursor.execute(f"SELECT * FROM {p_item} WHERE user_id = {userid}")
     columns = dict(zip(my_cursor.column_names, my_cursor.fetchone()))
     choice = 0
     while choice != 4:
         choice = pantry_item_menu(p_item)
         if choice == 1:
-            print("\n********** Inventory **********")
+            print(f"\n********** {p_item} Inventory **********")
             for key, value in columns.items():
                 if value == 1:
                     value = "In Stock"
@@ -98,21 +98,43 @@ def pantry_item(p_item):
                     value = "Out of Stock"
                 else:
                     pass
-                print(f"{key : <15}:{value : <18}")
+
+                if key != "user_id" and key != "user_id_fk":
+                    print(f"{key : <15}:{value : <18}")
 
         elif choice == 2:
+            print(f"\n********** {p_item} Inventory **********")
+            for key, value in columns.items():
+                if value == 1:
+                    value = "In Stock"
+                elif value == 0:
+                    value = "Out of Stock"
+                else:
+                    pass
+
+                if key != "user_id" and key != "user_id_fk":
+                    print(f"{key : <16}:{value : <18}")
+
+            item = input("What item you like to alter?: ")
+            stock = int(input("Would you like to add or remove an ingredient? \
+                               \n[1] Add \
+                               \n[2] Remove\n"))
+            if stock == 1:
+                my_cursor.execute(f"UPDATE {p_item} \
+                                   SET {item} = 1 \
+                                   WHERE user_id = {userid}")
+            elif stock == 2:
+                my_cursor.execute(f"UPDATE {p_item} \
+                                    SET {item} = 0 \
+                                    WHERE user_id = {userid}")
+
+        elif choice == 3:
             new = input("Enter name of ingredient you would like to add: ")
             choice = input("You entered " + new + ". Is this correct (Y or N)?")
             checked = choice.upper()
             if checked == "Y":
-                my_cursor.execute(f"ALTER TABLE dairy \
-                                    ADD COLUMN {new} INT; \
-                                    UPDATE dairy \
-                                    SET {new} = 1 \
-                                    WHERE user_id == {userid}; \
-                                    UPDATE dairy \
-                                    SET {new} = 0 \
-                                    WHERE user_id != {userid};")
+                my_cursor.execute(f"ALTER TABLE {p_item} \
+                                    ADD COLUMN {new} INT DEFAULT 0;")
                 print("Please restart app for changes to take effect.")
             else:
                 print("Invalid Input")
@@ -155,7 +177,34 @@ def plan_meals():
 
 
 def shopping_list():
-    print("shopping_list")
+    first = input("Would you like to generate a shopping list (Y or N)?   ")
+    final = first.lower()
+    if final == "y":
+        print("""****** Shopping List ******
+                 [1] Full List
+                 [2] One Category
+                 [3] Custom""")
+        choice = int(input("Make a selection: "))
+        if choice == 1:
+            my_cursor.execute(f"SELECT * FROM {p_item} WHERE user_id = {userid}")
+            columns = dict(zip(my_cursor.column_names, my_cursor.fetchone()))
+            choice = 0
+            while choice != 4:
+                choice = pantry_item_menu(p_item)
+                if choice == 1:
+                    print(f"\n********** {p_item} Inventory **********")
+                    for key, value in columns.items():
+                        if value == 1:
+                            value = "In Stock"
+                        elif value == 0:
+                            value = "Out of Stock"
+                        else:
+                            pass
+            my_cursor.execute("")
+    elif final == "n":
+        pass
+    else:
+        print("Invalid Input")
 
 
 def plan_meals():
