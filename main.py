@@ -1,19 +1,12 @@
-import mysql.connector
-
-mydb = mysql.connector.connect(
-    host="localhost",
-    user="root",
-    password="password",
-    port="3306",
-    database="pantry"
-)
-
-my_cursor = mydb.cursor(buffered=True)
+from sql_connection import get_sql_connection
+import requests
 
 # Accessing user table and checking to see if username in use
+connection = get_sql_connection()
 
 
 def register():
+    my_cursor = connection.cursor(buffered=True)
     should_restart = True
     while should_restart:
         my_cursor.execute("SELECT * FROM users")
@@ -35,17 +28,18 @@ def register():
     sql = "INSERT INTO users (username, password) VALUES (%s, %s)"  # Inserting new user into user table
     val = (user_name, password)
     my_cursor.execute(sql, val)
-    mydb.commit()
+    connection.commit()
 
 
-def access():
+def access(user_name, password):
+    my_cursor = connection.cursor(buffered=True)
     should_restart = True
     while should_restart:
         should_restart = False
         # user_name = input("Enter Username: ")
         # password = input("Enter Password: ")
-        user_name = "nathan"
-        password = "password"
+        # user_name = "nathan"
+        # password = "password"
         my_cursor.execute("SELECT * FROM users")
 
         for user in my_cursor:
@@ -70,7 +64,7 @@ def home(option=None):
         home()
 
 
-userid = home()  # Assigning userid
+# userid = home()  # Assigning userid
 
 
 def pantry_item_menu(p_item):
@@ -84,6 +78,7 @@ def pantry_item_menu(p_item):
 
 
 def pantry_item(p_item):
+    my_cursor = connection.cursor(buffered=True)
     my_cursor.execute(f"SELECT * FROM {p_item} WHERE user_id = {userid}")
     columns = dict(zip(my_cursor.column_names, my_cursor.fetchone()))
     choice = 0
@@ -138,7 +133,7 @@ def pantry_item(p_item):
                 print("Please restart app for changes to take effect.")
             else:
                 print("Invalid Input")
-    mydb.commit()
+    connection.commit()
 
 
 # //// Defining Main Functions ////
@@ -176,7 +171,8 @@ def plan_meals():
     print("meals")
 
 
-def shopping_list():
+def shopping_list(p_item):
+    my_cursor = connection.cursor(buffered=True)
     first = input("Would you like to generate a shopping list (Y or N)?   ")
     final = first.lower()
     if final == "y":
@@ -231,24 +227,25 @@ def menu():
     print("0. Exit")
 
 
-menu()
-ch = int(input("Make a choice: "))
-while ch != 0:
-    if ch == 1:
-        check_pantry()
-    elif ch == 2:
-        plan_meals()
-    elif ch == 3:
-        shopping_list()
-    elif ch == 4:
-        plan_meals()
-    elif ch == 5:
-        recipes()
-    elif ch == 6:
-        make_check()
-    elif ch == 0:
-        exit()
-    else:
-        print("Invalid Input")
-    menu()
-    ch = int(input("Make a choice: "))
+# menu()
+# ch = int(input("Make a choice: "))
+#while ch != 0:
+#   if ch == 1:
+#       check_pantry()
+#   elif ch == 2:
+#       plan_meals()
+#   elif ch == 3:
+#       shopping_list(p_item)
+#   elif ch == 4:
+#       plan_meals()
+#   elif ch == 5:
+#       recipes()
+#   elif ch == 6:
+#       make_check()
+#   elif ch == 0:
+#       exit()
+#   else:
+#       print("Invalid Input")
+#   menu()
+#   ch = int(input("Make a choice: "))
+
